@@ -4,6 +4,8 @@ Official Azure SDK [source](https://docs.microsoft.com/en-us/azure/go/).
 
 
 ```
+$ go build
+
 $ export AZURE_STORAGE_ACCOUNT=<>
 $ export AZURE_STORAGE_KEY=<>
 $ export TF_BACKEND_NAME=tfstate
@@ -11,12 +13,12 @@ $ export TF_BACKEND_NAME=tfstate
 
 # help
 
-$ go run blob.go -h
+$ ./azure_blob -h
 
 
 # container
 
-$ go run blob.go --action createContainer
+$ ./azure_blob --action createContainer
 Container tfstate created.
 
 [optional]
@@ -28,12 +30,12 @@ tfstate  unlocked        2020-02-07T10:59:10+00:00
 
 # files
 
-$ go run blob.go --action createUploadFile
+$ ./azure_blob --action createUploadFile
 Creating a dummy file: tweety-ce6d
 File tweety-ce6d created.
 Uploading the file with blob name: tweety-ce6d
 
-$ go run blob.go --action createUploadFile
+$ ./azure_blob --action createUploadFile
 Creating a dummy file: tweety-b5c6
 File tweety-b5c6 created.
 Uploading the file with blob name: tweety-b5c6
@@ -41,7 +43,7 @@ Uploading the file with blob name: tweety-b5c6
 
 # list blobs
 
-$ go run blob.go --action list | jq
+$ ./azure_blob --action list | jq
 {
   "data": [
     {
@@ -61,14 +63,14 @@ $ go run blob.go --action list | jq
   ]
 }
 
-$ go run blob.go --action list | jq '.data[].file_name'
+$ ./azure_blob --action list | jq '.data[].file_name'
 "tweety-b5c6"
 "tweety-ce6d"
 
 
 # download blob
 
-$ go run blob.go --action=download tweety-b5c6
+$ ./azure_blob --action=download tweety-b5c6
 Blob tweety-b5c6 downloaded.
 
 $ cat /tmp/tweety-b5c6 
@@ -77,7 +79,7 @@ Tweety vs Sylvester
 
 # delete container
 
-$ go run blob.go --action deleteContainer
+$ ./azure_blob --action deleteContainer
 Container tfstate deleted.
 
 [optional]
@@ -85,7 +87,7 @@ $ az storage container list --account-name $AZURE_STORAGE_ACCOUNT --account-key 
 
 
 # remove local file (be aware which file you are removing!)
-$ go run blob.go --action removeLocal /tmp/tweety-b5c6
-File /tmp/tweety-b5c6 removed.
 
+$ ./azure_blob --action removeLocal /tmp/tweety-b5c6
+File /tmp/tweety-b5c6 removed.
 ```
