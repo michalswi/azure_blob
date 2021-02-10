@@ -4,16 +4,13 @@ Official Azure SDK [source](https://docs.microsoft.com/en-us/azure/go/).
 
 
 ```
-$ go build
+go build
 
-$ export AZURE_STORAGE_ACCOUNT=<>
-$ export AZURE_STORAGE_KEY=<>
-$ export TF_BACKEND_NAME=tfstate
+export AZURE_STORAGE_ACCOUNT=
+export AZURE_STORAGE_KEY=
+export TF_BACKEND_NAME=tfstate
 
-
-# HELP
-
-$ ./azure_blob -h
+./azure_blob -h
 
 
 # CONTAINER

@@ -45,7 +45,7 @@ func main() {
 	// create a default request pipeline
 	credential, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
-		log.Fatalf("Invalid credentials with error: \n%v\n", err)
+		log.Fatalf("Invalid credentials with error: \n%v", err)
 	}
 	p := azblob.NewPipeline(credential, azblob.PipelineOptions{})
 
@@ -66,7 +66,7 @@ func main() {
 	case "createContainer":
 		_, err = containerURL.Create(ctx, azblob.Metadata{}, azblob.PublicAccessNone)
 		if err != nil {
-			log.Fatalf("Can't create container: \n%v\n", err)
+			log.Fatalf("Can't create container: \n%v", err)
 		}
 		fmt.Printf("Container %s created.\n", containerName)
 	case "createUploadFile":
@@ -79,7 +79,7 @@ func main() {
 	case "deleteContainer":
 		_, err = containerURL.Delete(ctx, azblob.ContainerAccessConditions{})
 		if err != nil {
-			log.Fatalf("Can't delete container: \n%v\n", err)
+			log.Fatalf("Can't delete container: \n%v", err)
 		}
 		fmt.Printf("Container %s deleted.\n", containerName)
 	case "removeLocal":
@@ -104,13 +104,13 @@ func createFile(ctx context.Context, containerURL azblob.ContainerURL) {
 	fmt.Printf("Creating a dummy file: %s\n", fileName)
 	err := ioutil.WriteFile(fileName, data, 0644)
 	if err != nil {
-		log.Fatalf("Can't create the file: %v\n", err)
+		log.Fatalf("Can't create the file: %v", err)
 	}
 
 	blobURL := containerURL.NewBlockBlobURL(fileName)
 	file, err := os.Open(fileName)
 	if err != nil {
-		log.Fatalf("Can't open the file: %v\n", err)
+		log.Fatalf("Can't open the file: %v", err)
 	}
 	fmt.Printf("File %s created.\n", fileName)
 	defer file.Close()
@@ -130,7 +130,7 @@ func createFile(ctx context.Context, containerURL azblob.ContainerURL) {
 		BlockSize:   4 * 1024 * 1024,
 		Parallelism: 16})
 	if err != nil {
-		log.Fatalf("Can't upload the file: \n%v\n", err)
+		log.Fatalf("Can't upload the file: \n%v", err)
 	}
 
 	// file.Close()
@@ -139,7 +139,7 @@ func createFile(ctx context.Context, containerURL azblob.ContainerURL) {
 // download blobs from a container
 func downloadFile(ctx context.Context, containerURL azblob.ContainerURL, fileName string) {
 	blobURL := containerURL.NewBlockBlobURL(fileName)
-	downloadResponse, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false)
+	downloadResponse, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false, azblob.ClientProvidedKeyOptions{})
 	// NOTE: automatically retries are performed if the connection fails
 	bodyStream := downloadResponse.Body(azblob.RetryReaderOptions{MaxRetryRequests: 20})
 	// read the body into a buffer
@@ -155,7 +155,7 @@ func downloadFile(ctx context.Context, containerURL azblob.ContainerURL, fileNam
 	// save downloaded file
 	err = ioutil.WriteFile("/tmp/"+fileName, downloadedData.Bytes(), 0644)
 	if err != nil {
-		log.Fatalf("Can't download the file %s: %v\n", fileName, err)
+		log.Fatalf("Can't download the file %s: %v", fileName, err)
 	}
 	fmt.Printf("Blob %s downloaded.\n", fileName)
 }
