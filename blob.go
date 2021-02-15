@@ -31,7 +31,7 @@ var finalJSON = make(map[string]interface{})
 func main() {
 
 	// take an action
-	action := flag.String("action", "", "createContainer/createUploadFile/list/download + <file_name>/deleteContainer/removeLocal + <file_name>")
+	action := flag.String("action", "", "createContainer|createUploadFile\nlist|download + <file_name>\ndeleteContainer|removeLocal + <file_name>")
 	flag.Parse()
 
 	accountName, accountKey, containerName :=

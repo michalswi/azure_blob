@@ -15,7 +15,7 @@ export TF_BACKEND_NAME=tfstate
 
 # CONTAINER
 
-$ ./azure_blob --action createContainer
+./azure_blob --action createContainer
 Container tfstate created.
 
 [optional]
@@ -27,12 +27,12 @@ tfstate  unlocked        2020-02-07T10:59:10+00:00
 
 # FILES
 
-$ ./azure_blob --action createUploadFile
+./azure_blob --action createUploadFile
 Creating a dummy file: tweety-ce6d
 File tweety-ce6d created.
 Uploading the file with blob name: tweety-ce6d
 
-$ ./azure_blob --action createUploadFile
+./azure_blob --action createUploadFile
 Creating a dummy file: tweety-b5c6
 File tweety-b5c6 created.
 Uploading the file with blob name: tweety-b5c6
@@ -42,7 +42,7 @@ Uploading the file with blob name: tweety-b5c6
 
 # >> 'size' is expressed in bytes
 
-$ ./azure_blob --action list | jq
+./azure_blob --action list | jq
 {
   "data": [
     {
@@ -62,31 +62,31 @@ $ ./azure_blob --action list | jq
   ]
 }
 
-$ ./azure_blob --action list | jq '.data[].file_name'
+./azure_blob --action list | jq '.data[].file_name'
 "tweety-b5c6"
 "tweety-ce6d"
 
 
 # DOWNLOAD blob
 
-$ ./azure_blob --action=download tweety-b5c6
+./azure_blob --action=download tweety-b5c6
 Blob tweety-b5c6 downloaded.
 
-$ cat /tmp/tweety-b5c6 
+cat /tmp/tweety-b5c6 
 Tweety vs Sylvester
 
 
 # DELETE container
 
-$ ./azure_blob --action deleteContainer
+./azure_blob --action deleteContainer
 Container tfstate deleted.
 
 [optional]
-$ az storage container list --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --output table
+az storage container list --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --output table
 
 
 # REMOVE local file (be aware which file you are removing!)
 
-$ ./azure_blob --action removeLocal /tmp/tweety-b5c6
+./azure_blob --action removeLocal /tmp/tweety-b5c6
 File /tmp/tweety-b5c6 removed.
 ```
