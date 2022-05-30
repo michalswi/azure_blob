@@ -8,85 +8,97 @@ go build
 
 export AZURE_STORAGE_ACCOUNT=
 export AZURE_STORAGE_KEY=
-export TF_BACKEND_NAME=tfstate
+export SA_CONTAINER_NAME=tfstate
 
 ./azure_blob -h
 
 
-# CONTAINER
+# create container
 
-./azure_blob --action createContainer
-Container tfstate created.
+$ ./azure_blob --action createContainer
+2022/05/26 19:13:50 Container tfstate created.
 
-[optional]
-$ az storage container list --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --output table
-Name     Lease Status    Last Modified
--------  --------------  -------------------------
-tfstate  unlocked        2020-02-07T10:59:10+00:00
+[optional]$ az storage container list --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --output table
 
 
-# FILES
+# create files locally and upload to blobs (one file one blob)
 
-./azure_blob --action createUploadFile
-Creating a dummy file: tweety-ce6d
-File tweety-ce6d created.
-Uploading the file with blob name: tweety-ce6d
+$ ./azure_blob --action createUploadFile
+2022/05/26 19:16:55 Creating a dummy file: tweety-c30b
+2022/05/26 19:16:55 File tweety-c30b created.
+2022/05/26 19:16:55 Uploading the file with blob name: tweety-c30b
 
-./azure_blob --action createUploadFile
-Creating a dummy file: tweety-b5c6
-File tweety-b5c6 created.
-Uploading the file with blob name: tweety-b5c6
+$ ./azure_blob --action createUploadFile
+2022/05/26 19:17:31 Creating a dummy file: tweety-8230
+2022/05/26 19:17:31 File tweety-8230 created.
+2022/05/26 19:17:31 Uploading the file with blob name: tweety-8230
+
+$ ./azure_blob --action createUploadFile
+2022/05/26 19:17:34 Creating a dummy file: tweety-35f7
+2022/05/26 19:17:34 File tweety-35f7 created.
+2022/05/26 19:17:34 Uploading the file with blob name: tweety-35f7
 
 
-# LIST blobs
+# list blobs
 
 # >> 'size' is expressed in bytes
 
-./azure_blob --action list | jq
+$ ./azure_blob --action list | jq
 {
   "data": [
     {
       "id": 1,
-      "file_name": "tweety-b5c6",
+      "file_name": "tweety-35f7",
       "size": 20,
-      "creation": "2020-02-07T11:04:14Z",
+      "creation": "2022-05-26T17:17:35Z",
       "content_type": "application/octet-stream"
     },
     {
       "id": 2,
-      "file_name": "tweety-ce6d",
+      "file_name": "tweety-8230",
       "size": 20,
-      "creation": "2020-02-07T11:04:07Z",
+      "creation": "2022-05-26T17:17:32Z",
+      "content_type": "application/octet-stream"
+    },
+    {
+      "id": 3,
+      "file_name": "tweety-c30b",
+      "size": 20,
+      "creation": "2022-05-26T17:16:56Z",
       "content_type": "application/octet-stream"
     }
   ]
 }
 
-./azure_blob --action list | jq '.data[].file_name'
-"tweety-b5c6"
-"tweety-ce6d"
+$ ./azure_blob --action list | jq '.data[].file_name'
+"tweety-35f7"
+"tweety-8230"
+"tweety-c30b"
+
+[optional]$ az storage blob list --container-name $SA_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --output table
 
 
-# DOWNLOAD blob
+# download data from blob
 
-./azure_blob --action=download tweety-b5c6
+
+$ ./azure_blob --action download tweety-35f7
 Blob tweety-b5c6 downloaded.
 
-cat /tmp/tweety-b5c6 
+$ cat /tmp/tweety-35f7
 Tweety vs Sylvester
 
 
-# DELETE container
+# delete container
 
 ./azure_blob --action deleteContainer
-Container tfstate deleted.
+2022/05/26 19:32:12 Container tfstate deleted.
 
 [optional]
 az storage container list --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --output table
 
 
-# REMOVE local file (be aware which file you are removing!)
+# remove local files
 
-./azure_blob --action removeLocal /tmp/tweety-b5c6
-File /tmp/tweety-b5c6 removed.
+$ ./azure_blob --action removeLocal ./tweety-35f7
+2022/05/26 13:35:11 File ./tweety-35f7 removed.
 ```

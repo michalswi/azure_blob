@@ -37,9 +37,9 @@ func main() {
 	accountName, accountKey, containerName :=
 		os.Getenv("AZURE_STORAGE_ACCOUNT"),
 		os.Getenv("AZURE_STORAGE_KEY"),
-		os.Getenv("TF_BACKEND_NAME")
+		os.Getenv("SA_CONTAINER_NAME")
 	if len(accountName) == 0 || len(accountKey) == 0 {
-		log.Fatal("Either the AZURE_STORAGE_ACCOUNT or AZURE_STORAGE_KEY or TF_BACKEND_NAME environment variable is not set")
+		log.Fatal("Either the AZURE_STORAGE_ACCOUNT or AZURE_STORAGE_KEY or SA_CONTAINER_NAME environment variable is not set")
 	}
 
 	// create a default request pipeline
@@ -66,9 +66,9 @@ func main() {
 	case "createContainer":
 		_, err = containerURL.Create(ctx, azblob.Metadata{}, azblob.PublicAccessNone)
 		if err != nil {
-			log.Fatalf("Can't create container: \n%v", err)
+			log.Fatalf("Can't create container: %v", err)
 		}
-		fmt.Printf("Container %s created.\n", containerName)
+		log.Printf("Container %s created.", containerName)
 	case "createUploadFile":
 		// create and upload file
 		createFile(ctx, containerURL)
@@ -81,27 +81,27 @@ func main() {
 		if err != nil {
 			log.Fatalf("Can't delete container: \n%v", err)
 		}
-		fmt.Printf("Container %s deleted.\n", containerName)
+		log.Printf("Container %s deleted.", containerName)
 	case "removeLocal":
 		// remove local file
 		fileName := flag.Args()[0]
 		os.Remove(fileName)
-		fmt.Printf("File %s removed.\n", fileName)
+		log.Printf("File %s removed.\n", fileName)
 	}
 }
 
-// generate random string
+// randToken generate random string
 func randToken(len int) string {
 	b := make([]byte, len)
 	rand.Read(b)
 	return fmt.Sprintf("%x", b)
 }
 
-// create a dummy file locally and upload to a container
+// createFile create a dummy file locally and upload to a container
 func createFile(ctx context.Context, containerURL azblob.ContainerURL) {
 	data := []byte("Tweety vs Sylvester\n")
 	fileName := fmt.Sprintf("tweety-%s", randToken(2))
-	fmt.Printf("Creating a dummy file: %s\n", fileName)
+	log.Printf("Creating a dummy file: %s", fileName)
 	err := ioutil.WriteFile(fileName, data, 0644)
 	if err != nil {
 		log.Fatalf("Can't create the file: %v", err)
@@ -112,7 +112,7 @@ func createFile(ctx context.Context, containerURL azblob.ContainerURL) {
 	if err != nil {
 		log.Fatalf("Can't open the file: %v", err)
 	}
-	fmt.Printf("File %s created.\n", fileName)
+	log.Printf("File %s created.\n", fileName)
 	defer file.Close()
 
 	// You can use the low-level PutBlob API to upload files. Low-level APIs are simple wrappers for the Azure Storage REST APIs.
@@ -125,21 +125,22 @@ func createFile(ctx context.Context, containerURL azblob.ContainerURL) {
 	// The high-level API UploadFileToBlockBlob function uploads blocks in parallel for optimal performance,
 	// and can handle large files as well.
 	// This function calls PutBlock/PutBlockList for files larger 256 MBs, and calls PutBlob for any file smaller
-	fmt.Printf("Uploading the file with blob name: %s\n", fileName)
+	log.Printf("Uploading the file with blob name: %s", fileName)
 	_, err = azblob.UploadFileToBlockBlob(ctx, file, blobURL, azblob.UploadToBlockBlobOptions{
 		BlockSize:   4 * 1024 * 1024,
 		Parallelism: 16})
 	if err != nil {
 		log.Fatalf("Can't upload the file: \n%v", err)
 	}
-
-	// file.Close()
 }
 
-// download blobs from a container
+// downloadFile download blobs from a container
 func downloadFile(ctx context.Context, containerURL azblob.ContainerURL, fileName string) {
 	blobURL := containerURL.NewBlockBlobURL(fileName)
 	downloadResponse, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false, azblob.ClientProvidedKeyOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
 	// NOTE: automatically retries are performed if the connection fails
 	bodyStream := downloadResponse.Body(azblob.RetryReaderOptions{MaxRetryRequests: 20})
 	// read the body into a buffer
@@ -150,19 +151,19 @@ func downloadFile(ctx context.Context, containerURL azblob.ContainerURL, fileNam
 	}
 
 	// downloaded blob data is in downloadData's buffer. :Let's print it
-	// fmt.Printf("Downloaded the blob: " + downloadedData.String())
+	// log.Printf("Downloaded the blob: " + downloadedData.String())
 
 	// save downloaded file
 	err = ioutil.WriteFile("/tmp/"+fileName, downloadedData.Bytes(), 0644)
 	if err != nil {
 		log.Fatalf("Can't download the file %s: %v", fileName, err)
 	}
-	fmt.Printf("Blob %s downloaded.\n", fileName)
+	log.Printf("Blob %s downloaded.", fileName)
 }
 
-// list blobs from a container
+// listBlobs list blobs from a container
 func listBlobs(ctx context.Context, containerURL azblob.ContainerURL, containerName string) {
-	// fmt.Printf("List blobs from %s container.\n", containerName)
+	// log.Printf("List blobs from %s container.", containerName)
 	for marker := (azblob.Marker{}); marker.NotDone(); {
 		// get a result segment starting with the blob indicated by the current Marker.
 		listBlob, err := containerURL.ListBlobsFlatSegment(ctx, marker, azblob.ListBlobsSegmentOptions{})
